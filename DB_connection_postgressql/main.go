@@ -29,17 +29,31 @@ func main() {
 	Checkerror(err)
 	fmt.Println("Connected")
 	rows, err := db.Query("Select first_name,last_name from employees")
+
 	insrt_qry = "Insert into emp values "
+	// the below commented code is used for single line insertion
+	// for rows.Next() {
+	// 	err := rows.Scan(&f_name, &l_name)
+	// 	Checkerror(err)
+	// 	stmt := `insert into emp values ($1,$2)`
+	// 	res, err := db.Exec(stmt, f_name, l_name)
+	// 	fmt.Println(res.LastInsertId())
+	// }
+
+	// below is for multi line insert with single command
+	cnt := 1
 	for rows.Next() {
-		err := rows.Scan(&f_name, &l_name)
-		Checkerror(err)
-		stmt := `insert into emp values ($1,$2)`
-		res, err := db.Exec(stmt, f_name, l_name)
-		fmt.Println(res.LastInsertId())
+		err = rows.Scan(&f_name, &l_name)
+		if cnt == 1 {
+			insrt_qry = insrt_qry + "\n('" + f_name + "','" + l_name + "')"
+			cnt++
+		} else {
+			insrt_qry = insrt_qry + "\n,('" + f_name + "','" + l_name + "')"
+		}
 	}
-	// stmt := `insert into emp(first_name,last_name) values ($1,$2)`
-	// _, err = db.Exec(stmt, "uday", "salla")
-	//fmt.Println(res.LastInsertId())
+	fmt.Println(insrt_qry)
+	_, err = db.Exec(insrt_qry)
+	Checkerror(err)
 	defer db.Close()
 
 }
